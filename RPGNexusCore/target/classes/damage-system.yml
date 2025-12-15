@@ -1,0 +1,25 @@
+# RPGNexusCore Damage System Configuration
+
+# ---------------------------------------------------------
+# [ Custom Formula Engine ]
+# 사용 가능한 변수:
+# - %attacker_STAT% (공격자의 스탯, 소문자)
+# - %defender_STAT% (방어자의 스탯, 소문자)
+# - 기본 사칙연산 (+, -, *, /) 및 괄호
+# - 함수: max(a,b), min(a,b), random(min,max), if(cond, true, false)
+# ---------------------------------------------------------
+Damage-System:
+  Damage-Category:
+    
+  # 데미지 문맥(Context)에 따른 계산식
+  Calculate:
+    # 물리 공격 (Melee)
+    # 예: (공격자 전투력 * 2) - 방어자 방어력. (최소 1)
+    Melee: "max(1, (%attacker_combat_ability% * 2) - %defender_defense_power%)"
+
+    # 원거리/마법 등 확장 가능
+    Ranged: "max(1, (%attacker_combat_ability% * 1.5) - (%defender_defense_power% * 0.5))"
+    
+    # 크리티컬 등 조건부 로직 예시 (if 사용)
+    # Critical: "if(random(0,100) < %attacker_crit_chance%, %attacker_damage% * 2, %attacker_damage%)"
+  

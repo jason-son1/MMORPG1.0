@@ -1,0 +1,126 @@
+RPGNexusCore Walkthrough
+RPGNexusCore 프로젝트의 초기 구조 구현이 완료되었습니다. 이 문서는 구현된 주요 기능과 구조에 대해 설명합니다.
+
+주요 변경 사항
+1. Maven 프로젝트 구조
+
+pom.xml
+: Spigot/Paper API 1.21, Lombok, Jackson Dataformat YAML, Vault 등 필수 의존성을 설정했습니다.
+Maven Shade Plugin: Jackson 라이브러리를 플러그인 내부에 포함(Shade)시키고 패키지를 재배치하여 충돌을 방지했습니다.
+2. Core 및 Manager 패턴
+RPGNexusCore: 플러그인 메인 클래스입니다. 
+
+CoreManager
+를 초기화합니다.
+CoreManager: 하위 매니저(
+
+ConfigManager
+, 
+
+HookManager
+)의 수명 주기를 중앙에서 관리합니다.
+
+enable()
+: 설정 로드 -> 훅 연결 순서로 초기화합니다.
+
+disable()
+: 역순으로 종료 처리합니다.
+3. Config System (DTO & Jackson)
+ConfigManager: Jackson ObjectMapper (YAMLFactory)를 사용하여 YAML 파일과 Java 객체(DTO)를 매핑합니다.
+DTO Classes:
+
+GeneralConfig
+: 기본 서버 설정 (language, debugMode 등)
+
+BattleConfig
+: 전투 공식 관련 설정 (criticalDamage 등)
+
+ClassConfig
+: RPG 직업 정의 설정
+특징: 웹 에디터 등에서 JSON으로 변환하여 사용하기 매우 용이한 구조입니다.
+4. Hook System (Abstraction)
+HookManager: 외부 플러그인 유무를 감지하고 안전하게 훅을 연결합니다.
+HookProvider: 모든 훅의 최상위 인터페이스입니다.
+Interfaces:
+
+EconomyHook
+: 경제 시스템 추상화
+
+PermissionHook
+: 권한 시스템 추상화
+
+MobPluginHook
+: 몹 스폰 시스템 추상화
+Implementations:
+
+VaultEconomyHook
+: Vault가 있을 때만 활성화되어 경제 기능을 제공합니다.
+사용 예시
+Config 사용
+// CoreManager를 통해 ConfigManager 접근
+GeneralConfig config = RPGNexusCore.getInstance().getCoreManager().getConfigManager().getGeneralConfig();
+String prefix = config.getServerSettings().getMessages().get("prefix");
+Hook 사용
+HookManager hookManager = RPGNexusCore.getInstance().getCoreManager().getHookManager();
+EconomyHook edu = hookManager.getEconomyHook();
+if (edu.isHooked()) {
+    edu.deposit(player, 1000);
+}
+검증 결과
+Maven 컴파일 테스트를 통과했습니다.
+프로젝트 구조가 요구사항(Manager 패턴, Config DTO, Hook 추상화)을 충족합니다.
+
+
+Damage-System:
+    Damage-Category:
+  
+    Definitions:
+        player_attacker_atk: "%player-status#Combat-Ability#$attacker$% OR 0"
+        player_defender_def: "%player-status#Defense-Ability#$defender$% OR 0"
+        player_crit_chance: "%player-status#Critical#$attacker$% OR 0"
+        player_crit_dmg: "%player-status#Critical-Damage#$attacker$% OR 1.5"
+    
+
+    
+        default_damage_mag: "%damage-mag% OR 1.0"
+    Tools:
+        pvp_step_crit_success: "if(random(0, 100) < crit_chance, 1, 0)"
+        pvp_step_defense_ratio: "max(0.1, 1 - (defender_def / (attacker_atk + 100)))"  
+        pvp_step_base_damage: "attacker_atk * default_damage_mag"
+    Calculate:
+        PVP:
+            Final_Damage: "step_base_damage * (step_crit_success == 1 ? player_crit_dmg : 1.0) * step_defense_ratio"
+        PVE:
+            Final_Damage: 
+        EVP:
+            Final_Damage:
+        EVE:
+            Final_Damage:
+    # 물리 공격 (Melee)
+    # 예: (공격자 전투력 * 2) - 방어자 방어력. (최소 1)
+        Melee: "max(1, (%attacker_combat_ability% * 2) - %defender_defense_power%)"
+
+    # 원거리/마법 등 확장 가능
+        Ranged: "max(1, (%attacker_combat_ability% * 1.5) - (%defender_defense_power% * 0.5))"
+    
+    # 크리티컬 등 조건부 로직 예시 (if 사용)
+    # Critical: "if(random(0,100) < %attacker_crit_chance%, %attacker_damage% * 2, %attacker_damage%)"
+    
+
+Player-Health-System:
+    Definition:
+        main-health-status-max: "%player-status#Max-Health%"
+        main-health-status: "%player-status#Health%"
+        
+        level: "%player-status#Level%"
+        healthstat: "%player-status#HealthStat%"
+    Tools:
+        status_base: "healthstat + level"
+    Calculate:
+        
+
+Player-Mana-System:
+    
+    
+    
+    

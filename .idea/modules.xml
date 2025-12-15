@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/MMORPG.iml" filepath="$PROJECT_DIR$/.idea/MMORPG.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RPGNexusCore/RPGNexusCore.iml" filepath="$PROJECT_DIR$/RPGNexusCore/RPGNexusCore.iml" />
+    </modules>
+  </component>
+</project>

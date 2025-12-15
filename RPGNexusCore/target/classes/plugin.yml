@@ -1,0 +1,12 @@
+name: RPGNexusCore
+version: 1.0.0
+main: com.rpgnexus.core.RPGNexusCore
+api-version: 1.21
+authors: [User]
+description: A comprehensive RPG core plugin.
+softdepend: [Vault, MythicMobs, MagicSpells]
+commands:
+  nexus:
+    description: Main command for RPGNexusCore
+    permission: rpgnexus.admin
+    usage: /nexus reload

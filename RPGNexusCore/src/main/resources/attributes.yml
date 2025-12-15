@@ -1,0 +1,51 @@
+# RPGNexusCore Attribute Configuration
+# 플레이어의 모든 스탯/속성을 여기서 정의합니다.
+
+Player-Status-Data:
+  # 전투 관련 스탯
+  Battle-Status:
+    Combat-Ability:
+      display-name: "전투력"
+      default: 0.0
+    Defense-Power:
+      display-name: "방어력"
+      default: 0.0
+    Max-Health:
+      display-name: "최대 체력"
+      default: 100.0
+    Health:
+      display-name: "체력"
+      default: 100.0
+    Max-Mana:
+      display-name: "최대 마나"
+      default: 100.0
+    Mana:
+      display-name: "마나"
+      default: 100.0
+
+  # 기본 스탯 (STR, DEX, etc.)
+  Basic-Status:
+    Strength:
+      display-name: "힘"
+      default: 5.0
+    Dexterity:
+      display-name: "민첩"
+      default: 5.0
+    Intelligence:
+      display-name: "지능"
+      default: 5.0
+    Luck:
+      display-name: "행운"
+      default: 5.0
+    HealthStat:
+      display-name: "체력스텟"
+      default: 5.0
+
+  # 기타 (레벨, 경험치 등도 여기서 관리 가능)
+  Progression:
+    Level:
+      display-name: "레벨"
+      default: 1.0
+    Experience:
+      display-name: "경험치"
+      default: 0.0

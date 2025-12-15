@@ -1,0 +1,35 @@
+# RPGNexusCore Class Configuration
+# 직업 계층 구조를 정의합니다.
+# parent: "부모직업이름" (없으면 1차 직업)
+# tier: 직업 차수 (1, 2, 3...)
+
+Classes-Data:
+  Novice:
+    display-name: "초보자"
+    tier: 1
+    parent: "None"
+
+  Warrior:
+    display-name: "전사"
+    tier: 2
+    parent: "Novice"
+
+  Mage:
+    display-name: "마법사"
+    tier: 2
+    parent: "Novice"
+
+  Knight:
+    display-name: "기사"
+    tier: 3
+    parent: "Warrior"
+
+  Berserker:
+    display-name: "광전사"
+    tier: 3
+    parent: "Warrior"
+
+  Wizard:
+    display-name: "위자드"
+    tier: 3
+    parent: "Mage"
