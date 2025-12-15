@@ -13,6 +13,8 @@ com\rpgnexus\core\network\packet\Packet.class
 com\rpgnexus\core\config\dto\BattleConfig$PvpSettings.class
 com\rpgnexus\core\registry\AttributeRegistry.class
 com\rpgnexus\core\data\storage\JsonDataStorage.class
+com\rpgnexus\core\config\dto\DamageSystemConfig$CategoryDetail.class
+com\rpgnexus\core\script\FormulaContext.class
 com\rpgnexus\core\hook\interfaces\MobPluginHook.class
 com\rpgnexus\core\battle\BattleManager.class
 com\rpgnexus\core\network\packet\PlayerStatusPacket$Payload.class
@@ -24,7 +26,9 @@ com\rpgnexus\core\config\dto\BattleConfig.class
 com\rpgnexus\core\config\dto\GeneralConfig.class
 com\rpgnexus\core\papi\NexusPapiExpansion.class
 com\rpgnexus\core\network\packet\PlayerStatusPacket.class
+com\rpgnexus\core\config\dto\NormalSystemConfig$SystemDef.class
 com\rpgnexus\core\script\FormulaParser$VariableNode.class
+com\rpgnexus\core\config\dto\DamageSystemConfig$DamageSystem.class
 com\rpgnexus\core\util\VariableBridge.class
 com\rpgnexus\core\data\node\ClassNode.class
 com\rpgnexus\core\RPGNexusCore.class
@@ -33,15 +37,16 @@ com\rpgnexus\core\script\FormulaParser$FunctionNode.class
 com\rpgnexus\core\network\packet\TargetInfoPacket.class
 com\rpgnexus\core\config\dto\AttributeConfig.class
 com\rpgnexus\core\hook\impl\LuckPermsHook.class
+com\rpgnexus\core\config\dto\NormalSystemConfig.class
 com\rpgnexus\core\command\NexusCommand.class
 com\rpgnexus\core\network\NetworkManager.class
 com\rpgnexus\core\network\packet\PacketType.class
 com\rpgnexus\core\network\packet\TargetInfoPacket$Payload.class
 com\rpgnexus\core\config\dto\DamageSystemConfig.class
 com\rpgnexus\core\script\FormulaParser$ConstantNode.class
-com\rpgnexus\core\config\dto\AttributeConfig$AttributeCategory.class
 com\rpgnexus\core\network\NetworkListener.class
 com\rpgnexus\core\data\dto\NexusProfile.class
+com\rpgnexus\core\manager\NormalSystemManager.class
 com\rpgnexus\core\data\storage\DataStorage.class
 com\rpgnexus\core\registry\AttributeDefinition.class
 com\rpgnexus\core\script\ScriptEngine.class

@@ -9,6 +9,7 @@ E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\cor
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\config\dto\ClassConfig.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\config\dto\DamageSystemConfig.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\config\dto\GeneralConfig.java
+E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\config\dto\NormalSystemConfig.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\data\DataManager.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\data\dto\NexusProfile.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\data\node\ClassNode.java
@@ -24,6 +25,7 @@ E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\cor
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\manager\ClassManager.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\manager\CoreManager.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\manager\Manager.java
+E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\manager\NormalSystemManager.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\network\NetworkListener.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\network\NetworkManager.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\network\packet\Packet.java
@@ -34,6 +36,7 @@ E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\cor
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\registry\AttributeDefinition.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\registry\AttributeRegistry.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\RPGNexusCore.java
+E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\script\FormulaContext.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\script\FormulaParser.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\script\ScriptEngine.java
 E:\Minecraft\minecraft plugin\MMORPG\RPGNexusCore\src\main\java\com\rpgnexus\core\util\VariableBridge.java
