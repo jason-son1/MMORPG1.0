@@ -70,23 +70,80 @@ if (edu.isHooked()) {
 Maven 컴파일 테스트를 통과했습니다.
 프로젝트 구조가 요구사항(Manager 패턴, Config DTO, Hook 추상화)을 충족합니다.
 
+# RPGNexusCore Damage System Configuration
+
+# ---------------------------------------------------------
+# [ Custom Formula Engine ]
+# 사용 가능한 변수:
+# - %attacker_STAT% (공격자의 스탯, 소문자)
+# - %defender_STAT% (방어자의 스탯, 소문자)
+# - 기본 사칙연산 (+, -, *, /) 및 괄호
+# - 함수: max(a,b), min(a,b), random(min,max), if(cond, true, false)
+# ---------------------------------------------------------
+
+#실제 대미지를 정의하고 구현하는 부분
+
 
 Damage-System:
+    #대미지의 종류를 정의하는 부분 
     Damage-Category:
-  
+    #다음은 예시 구문으로 원하는 대로 정의할 수 있음
+          # 1. 공격 방식 (Kind)
+  # 예: 근거리 vs 원거리
+        Damage-Kind:
+            melee:
+                display-name: "&c근거리"
+                default-multiplier: 1.0
+                description: "무기를 직접 휘둘러 공격합니다."
+            ranged:
+                display-name: "&a원거리"
+                default-multiplier: 0.8
+                description: "멀리서 투사체를 발사합니다."
+
+  # 2. 공격 속성 (Sort)
+  # 예: 물리 vs 마법
+        Damage-Sort:
+            physical:
+                display-name: "&7물리"
+                default-multiplier: 1.0
+      # (심화) 이 공격을 막으려면 어떤 방어 스탯이 필요한지 지정 가능 
+            magical:
+                display-name: "&b마법"
+                default-multiplier: 1.2
+
+  # 3. 공격 출처 (Stem)
+  # 예: 평타, 스킬, 패시브
+        Damage-Stem:
+            normal:
+                display-name: "일반 공격"
+                default-multiplier: 1.0
+            skill:
+                display-name: "스킬 적중"
+                default-multiplier: 1.5
+            passive:
+                display-name: "패시브 효과"
+                default-multiplier: 0.5
+
+    #Definitions은 사용할 변수를 정의할 부분 또는 데이터 정의 부분
     Definitions:
         player_attacker_atk: "%player-status#Combat-Ability#$attacker$% OR 0"
         player_defender_def: "%player-status#Defense-Ability#$defender$% OR 0"
         player_crit_chance: "%player-status#Critical#$attacker$% OR 0"
         player_crit_dmg: "%player-status#Critical-Damage#$attacker$% OR 1.5"
     
-
-    
-        default_damage_mag: "%damage-mag% OR 1.0"
+        # Java에서 넘겨준 damage_mag 변수 사용
+        # 대미지를 주는 매커니즘에서 정의되는 대미지값 
+        default_damage_mag: "%damage_mag% OR 1.0"
+        
+        # Java에서 넘겨준 context_multiplier 변수 사용
+        # 대미지 카테고리에서 나온 multiplier를 적용한 값
+        final_multiplier: "%context_multiplier% OR 1.0"
+    #사용할 변수들을 사용해서 중간 매개 변수 설정 (계산의 용이를 위함)
     Tools:
         pvp_step_crit_success: "if(random(0, 100) < crit_chance, 1, 0)"
         pvp_step_defense_ratio: "max(0.1, 1 - (defender_def / (attacker_atk + 100)))"  
         pvp_step_base_damage: "attacker_atk * default_damage_mag"
+    #실제 대미지를 계산하는 부분
     Calculate:
         PVP:
             Final_Damage: "step_base_damage * (step_crit_success == 1 ? player_crit_dmg : 1.0) * step_defense_ratio"
@@ -96,31 +153,64 @@ Damage-System:
             Final_Damage:
         EVE:
             Final_Damage:
-    # 물리 공격 (Melee)
-    # 예: (공격자 전투력 * 2) - 방어자 방어력. (최소 1)
-        Melee: "max(1, (%attacker_combat_ability% * 2) - %defender_defense_power%)"
-
-    # 원거리/마법 등 확장 가능
-        Ranged: "max(1, (%attacker_combat_ability% * 1.5) - (%defender_defense_power% * 0.5))"
+            
     
-    # 크리티컬 등 조건부 로직 예시 (if 사용)
-    # Critical: "if(random(0,100) < %attacker_crit_chance%, %attacker_damage% * 2, %attacker_damage%)"
     
+#플러그인이 제공하는 Normal-System을 정의하는 Config
+#Player-Health-System, Player-Mana-System, Player-Exp-System 등 RPG에 필요한 기본적인 시스템을 정의
+#Definition는 고정, Tools는 기능제공, Calculate는 고정 또는 제공
 
 Player-Health-System:
+    #변수 정의혹은 데이터 정의
     Definition:
+    #필수 data 실제 마인크래프트 체력에 적용시킬 data
         main-health-status-max: "%player-status#Max-Health%"
         main-health-status: "%player-status#Health%"
-        
+    #다른 Section에도 있는 내부에서 사용할 변수를 정의해주는 부분
         level: "%player-status#Level%"
         healthstat: "%player-status#HealthStat%"
+        str: "%player-status#Strength%"
     Tools:
-        status_base: "healthstat + level"
+    #계산을 용이하게 할 중간계산 변수
+        status_base: "healthstat + str"
     Calculate:
-        
+    #definition의 main-health-status-max의 값을 실제로 저장하는 부분 지금 예시의 경우
+    #%player-status#Max-Health%에 해당하는 데이터에 "status_base * level"이 값이 들어가는 구조
+        main-health-status-max: "status_base * level"
 
 Player-Mana-System:
+    Definition:
+    #필수 data 실제 마인크래프트 체력에 적용시킬 data
+        main-mana-status-max: "%player-status#Max-Mana%"
+        main-mana-status: "%player-status#Mana%"
+    #다른 Section에도 있는 내부에서 사용할 변수를 정의해주는 부분
+        level: "%player-status#Level%"
+        manastat: "%player-status#ManaStat%"
+        int: "%player-status#Intelligence%"
+    Tools:
+    #계산을 용이하게 할 중간계산 변수
+        status_base: "manastat + int"
+    Calculate:
+    #definition의 main-mana-status-max의 값을 실제로 저장하는 부분 지금 예시의 경우
+    #%player-status#Max-Mana%에 해당하는 데이터에 "status_base * level"이 값이 들어가는 구조
+        main-mana-status-max: "status_base * level"
+   
+Player-Exp-System:
+    Definition:
     
+    Tools:
     
+    Calculate:
     
+와 같이 사용할거야
+
+이건 단순히 예시야, 실제로는 자유롭게 설정할 수 있어야해
+
+지금 모든 시스템 설정을 하는 모든 부분을 분석해서
+변경부분을 제대로 적용될 수 있게 바꿔주고
+
+관련된 다른 클래스들 살펴보면 사실상 필요없는 클래스나 부분들이 있으니까 그런 클래스나 method는 없애도 되고 다른 방법으로 활용할 수 있는 부분이 있으면 활용해줘
+
+모든 config나 데이터 해석에 관련된 부분을 분석및 수정 부탁해
+
     

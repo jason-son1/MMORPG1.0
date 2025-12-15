@@ -29,6 +29,7 @@ public class CoreManager extends Manager {
     // New Systems
     private com.rpgnexus.core.registry.AttributeRegistry attributeRegistry;
     private com.rpgnexus.core.manager.ClassManager classManager;
+    private com.rpgnexus.core.manager.NormalSystemManager normalSystemManager;
 
     public CoreManager(RPGNexusCore plugin) {
         super(plugin);
@@ -58,6 +59,10 @@ public class CoreManager extends Manager {
         // 3.5 ClassManager 초기화
         this.classManager = new com.rpgnexus.core.manager.ClassManager(plugin, configManager.getClassConfig());
         registerManager(classManager);
+
+        // 3.6 NormalSystemManager 초기화
+        this.normalSystemManager = new com.rpgnexus.core.manager.NormalSystemManager(plugin);
+        registerManager(normalSystemManager);
 
         // 4. NetworkManager 초기화 (통신 채널)
         this.networkManager = new com.rpgnexus.core.network.NetworkManager(plugin);
@@ -152,5 +157,9 @@ public class CoreManager extends Manager {
 
     public com.rpgnexus.core.manager.ClassManager getClassManager() {
         return classManager;
+    }
+
+    public com.rpgnexus.core.manager.NormalSystemManager getNormalSystemManager() {
+        return normalSystemManager;
     }
 }

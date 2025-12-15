@@ -1,17 +1,43 @@
 package com.rpgnexus.core.config.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Map;
-import java.util.LinkedHashMap;
 
-/**
- * damage-system.yml 파일에 매핑되는 데미지 공식 설정 객체입니다.
- */
 @Data
 @NoArgsConstructor
 public class DamageSystemConfig {
 
-    private Map<String, String> damageFormulas = new LinkedHashMap<>();
+    @JsonProperty("Damage-System")
+    private DamageSystem damageSystem;
 
+    @Data
+    @NoArgsConstructor
+    public static class DamageSystem {
+        @JsonProperty("Damage-Category")
+        private Map<String, Map<String, CategoryDetail>> damageCategory; // Changed to dynamic map
+
+        @JsonProperty("Definitions")
+        private Map<String, String> definitions;
+
+        @JsonProperty("Tools")
+        private Map<String, String> tools;
+
+        @JsonProperty("Calculate")
+        private Map<String, Map<String, String>> calculate;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class CategoryDetail {
+        @JsonProperty("display-name")
+        private String displayName;
+
+        @JsonProperty("default-multiplier")
+        private double defaultMultiplier;
+
+        @JsonProperty("description")
+        private String description;
+    }
 }

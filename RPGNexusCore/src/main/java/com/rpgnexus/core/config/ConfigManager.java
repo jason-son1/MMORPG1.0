@@ -8,6 +8,7 @@ import com.rpgnexus.core.config.dto.BattleConfig;
 import com.rpgnexus.core.config.dto.ClassConfig;
 import com.rpgnexus.core.config.dto.DamageSystemConfig;
 import com.rpgnexus.core.config.dto.GeneralConfig;
+import com.rpgnexus.core.config.dto.NormalSystemConfig;
 import com.rpgnexus.core.manager.Manager;
 
 import java.io.File;
@@ -26,12 +27,14 @@ public class ConfigManager extends Manager {
     private ClassConfig classConfig;
     private AttributeConfig attributeConfig;
     private DamageSystemConfig damageSystemConfig;
+    private NormalSystemConfig normalSystemConfig;
 
     private File generalFile;
     private File battleFile;
     private File classFile;
     private File attributeFile;
     private File damageSystemFile;
+    private File normalSystemFile;
 
     public ConfigManager(RPGNexusCore plugin) {
         super(plugin);
@@ -48,6 +51,7 @@ public class ConfigManager extends Manager {
         this.classFile = new File(plugin.getDataFolder(), "classes.yml");
         this.attributeFile = new File(plugin.getDataFolder(), "attributes.yml");
         this.damageSystemFile = new File(plugin.getDataFolder(), "damage-system.yml");
+        this.normalSystemFile = new File(plugin.getDataFolder(), "normal-system.yml");
 
         reload();
     }
@@ -65,6 +69,7 @@ public class ConfigManager extends Manager {
         this.classConfig = loadConfig(classFile, ClassConfig.class, "classes.yml");
         this.attributeConfig = loadConfig(attributeFile, AttributeConfig.class, "attributes.yml");
         this.damageSystemConfig = loadConfig(damageSystemFile, DamageSystemConfig.class, "damage-system.yml");
+        this.normalSystemConfig = loadConfig(normalSystemFile, NormalSystemConfig.class, "normal-system.yml");
 
         plugin.getLogger().info("모든 설정 파일이 로드되었습니다.");
     }
@@ -130,5 +135,9 @@ public class ConfigManager extends Manager {
 
     public DamageSystemConfig getDamageSystemConfig() {
         return damageSystemConfig;
+    }
+
+    public NormalSystemConfig getNormalSystemConfig() {
+        return normalSystemConfig;
     }
 }

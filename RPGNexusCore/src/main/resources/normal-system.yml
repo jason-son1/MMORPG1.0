@@ -1,0 +1,50 @@
+# 플러그인이 제공하는 Normal-System을 정의하는 Config
+# Player-Health-System, Player-Mana-System, Player-Exp-System 등 RPG에 필요한 기본적인 시스템을 정의
+# Definition는 고정, Tools는 기능제공, Calculate는 고정 또는 제공
+
+Player-Health-System:
+    # 변수 정의 혹은 데이터 정의
+    Definition:
+        # 필수 data: 실제 마인크래프트 체력에 적용시킬 data
+        main-health-status-max: "%player-status#Max-Health%"
+        main-health-status: "%player-status#Health%"
+        
+        # 내부에서 사용할 변수 정의
+        level: "%player-status#Level%"
+        healthstat: "%player-status#HealthStat%"
+        str: "%player-status#Strength%"
+        
+    Tools:
+        # 계산을 용이하게 할 중간계산 변수
+        status_base: "healthstat + str"
+        
+    Calculate:
+        # main-health-status-max 계산
+        main-health-status-max: "status_base * level * 10"
+
+Player-Mana-System:
+    Definition:
+        main-mana-status-max: "%player-status#Max-Mana%"
+        main-mana-status: "%player-status#Mana%"
+        
+        level: "%player-status#Level%"
+        manastat: "%player-status#ManaStat%"
+        int: "%player-status#Intelligence%"
+        
+    Tools:
+        status_base: "manastat + int"
+        
+    Calculate:
+        main-mana-status-max: "status_base * level * 5"
+   
+Player-Exp-System:
+    Definition:
+        main-exp-status: "%player-status#Exp%"
+        level: "%player-status#Level%"
+    
+    Tools:
+        base_exp_req: "100"
+    
+    Calculate:
+        # 레벨업에 필요한 경험치 계산 등
+        exp-requirement: "base_exp_req * (level * level)"

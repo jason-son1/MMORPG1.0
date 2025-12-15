@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * 속성(Attribute) 등록소입니다.
  * attributes.yml (AttributeConfig) 데이터를 기반으로 속성을 메모리에 등록합니다.
+ * 이제 재귀적으로 파싱하여 임의의 깊이와 구조를 지원합니다.
  */
 public class AttributeRegistry {
 
@@ -31,52 +32,78 @@ public class AttributeRegistry {
             return;
         }
 
-        for (Map.Entry<String, AttributeConfig.AttributeCategory> categoryEntry : attributeConfig.getPlayerStatusData()
-                .entrySet()) {
-            String categoryName = categoryEntry.getKey();
-            AttributeConfig.AttributeCategory category = categoryEntry.getValue();
-
-            if (category.getAttributes() == null)
-                continue;
-
-            for (Map.Entry<String, AttributeConfig.AttributeDefinition> attrEntry : category.getAttributes()
-                    .entrySet()) {
-                String key = attrEntry.getKey();
-                AttributeConfig.AttributeDefinition defDto = attrEntry.getValue();
-
-                // Path construction (Category.AttributeName)
-                String path = categoryName + "." + key;
-
-                registerAttribute(key, path, defDto);
-            }
-        }
+        // Start recursive parsing from root
+        parseRecursive(attributeConfig.getPlayerStatusData(), "");
 
         plugin.getLogger().info("총 " + attributes.size() + "개의 속성이 로드되었습니다.");
     }
 
-    private void registerAttribute(String key, String path, AttributeConfig.AttributeDefinition dto) {
-        String internalKey = key.toLowerCase().replace("-", "_"); // 키 표준화
+    @SuppressWarnings("unchecked")
+    private void parseRecursive(Map<String, Object> currentMap, String parentPath) {
+        for (Map.Entry<String, Object> entry : currentMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
 
-        // 중복 체크
-        if (attributes.containsKey(internalKey)) {
-            plugin.getLogger().warning("중복된 속성 키 감지: " + internalKey + " (" + path + ")");
+            // Construct current path
+            String currentPath = parentPath.isEmpty() ? key : parentPath + "." + key;
+
+            if (value instanceof Map) {
+                Map<String, Object> childMap = (Map<String, Object>) value;
+
+                // Check if this map is a leaf node (Attribute Definition)
+                // We check for specific keys that define an attribute.
+                // User said: display-name, default, status-value
+                if (isAttributeDefinition(childMap)) {
+                    registerAttribute(key, currentPath, childMap);
+                } else {
+                    // It's a directory/category, recurse deeper
+                    parseRecursive(childMap, currentPath);
+                }
+            } else {
+                // Unexpected structure or scalar value where map expected, ignore
+            }
+        }
+    }
+
+    private boolean isAttributeDefinition(Map<String, Object> map) {
+        // "default" or "status-value" presence implies it's an attribute
+        return map.containsKey("default") || map.containsKey("status-value") || map.containsKey("display-name");
+    }
+
+    private void registerAttribute(String key, String path, Map<String, Object> data) {
+        String internalKey = key; // Keep case sensitive or not? Usually keys are case-insensitive in lookup
+
+        // For consistency with previous logic, let's lowercase internal keys but keep
+        // display names
+        // But if user wants arbitrary keys, maybe case sensitivity matters?
+        // Let's stick to lowercasing for internal lookup to avoid confusion.
+        String lookupKey = internalKey.toLowerCase();
+
+        if (attributes.containsKey(lookupKey)) {
+            plugin.getLogger().warning("중복된 속성 키 감지: " + lookupKey + " (" + path + ")");
         }
 
-        String displayName = dto.getDisplayName() != null ? dto.getDisplayName() : key;
-        double defaultValue = dto.getDefaultValue();
+        String displayName = (String) data.getOrDefault("display-name", key);
 
-        AttributeDefinition def = new AttributeDefinition(internalKey, path, displayName, defaultValue);
-        attributes.put(internalKey, def);
+        Object defaultObj = data.getOrDefault("default", 0.0);
+        double defaultValue = 0.0;
+        if (defaultObj instanceof Number) {
+            defaultValue = ((Number) defaultObj).doubleValue();
+        }
 
-        plugin.debug("속성 등록됨: " + internalKey + " (기본값: " + defaultValue + ")");
+        AttributeDefinition def = new AttributeDefinition(lookupKey, path, displayName, defaultValue);
+        attributes.put(lookupKey, def);
+
+        // Debug logging (optional)
+        // plugin.debug("속성 등록됨: " + lookupKey + " (" + path + ")");
     }
 
     public boolean isValid(String key) {
-        return attributes.containsKey(key);
+        return attributes.containsKey(key.toLowerCase());
     }
 
     public AttributeDefinition getAttribute(String key) {
-        return attributes.get(key);
+        return attributes.get(key.toLowerCase());
     }
 
     public Map<String, AttributeDefinition> getAllAttributes() {

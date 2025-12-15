@@ -43,9 +43,9 @@ public class FormulaParser {
 
     public static class BinaryOpNode implements Node {
         private final Node left, right;
-        private final char op;
+        private final String op;
 
-        public BinaryOpNode(Node left, char op, Node right) {
+        public BinaryOpNode(Node left, String op, Node right) {
             this.left = left;
             this.op = op;
             this.right = right;
@@ -54,20 +54,35 @@ public class FormulaParser {
         @Override
         public double evaluate(Map<String, Double> context) {
             double l = left.evaluate(context);
+            // Short-circuit for OR
+            if (op.equals("OR")) {
+                if (l != 0.0)
+                    return l; // Truthy
+                return right.evaluate(context);
+            }
+
             double r = right.evaluate(context);
             switch (op) {
-                case '+':
+                case "+":
                     return l + r;
-                case '-':
+                case "-":
                     return l - r;
-                case '*':
+                case "*":
                     return l * r;
-                case '/':
+                case "/":
                     return r == 0 ? 0 : l / r;
-                case '>':
+                case ">":
                     return l > r ? 1.0 : 0.0;
-                case '<':
+                case "<":
                     return l < r ? 1.0 : 0.0;
+                case ">=":
+                    return l >= r ? 1.0 : 0.0;
+                case "<=":
+                    return l <= r ? 1.0 : 0.0;
+                case "==":
+                    return l == r ? 1.0 : 0.0;
+                case "!=":
+                    return l != r ? 1.0 : 0.0;
                 default:
                     return 0;
             }
@@ -160,34 +175,75 @@ public class FormulaParser {
     }
 
     // Grammar:
-    // expression = term | expression `+` term | expression `-` term
-    // term = factor | term `*` factor | term `/` factor
-    // factor = `+` factor | `-` factor | `(` expression `)` | number | functionName
-    // `(` ... `)` | `%` variable `%`
+    // expression = logical_or
+    // logical_or = equality { " OR " equality }
+    // equality = relational { ("==" | "!=") relational }
+    // relational = additive { (">" | "<" | ">=" | "<=") additive }
+    // additive = multiplicative { ("+" | "-") multiplicative }
+    // multiplicative = factor { ("*" | "/") factor }
+    // factor = ...
 
     private Node parseExpression() {
-        Node x = parseTerm();
+        return parseLogicalOr();
+    }
+
+    private Node parseLogicalOr() {
+        Node x = parseEquality();
         for (;;) {
-            if (eat('+'))
-                x = new BinaryOpNode(x, '+', parseTerm()); // addition
-            else if (eat('-'))
-                x = new BinaryOpNode(x, '-', parseTerm()); // subtraction
-            else if (eat('>'))
-                x = new BinaryOpNode(x, '>', parseTerm()); // Logic GT
-            else if (eat('<'))
-                x = new BinaryOpNode(x, '<', parseTerm()); // Logic LT
+            if (eatString(" OR ")) // Case-insensitive handling might be needed but assuming strict for now
+                x = new BinaryOpNode(x, "OR", parseEquality());
             else
                 return x;
         }
     }
 
-    private Node parseTerm() {
+    private Node parseEquality() {
+        Node x = parseRelational();
+        for (;;) {
+            if (eatString("=="))
+                x = new BinaryOpNode(x, "==", parseRelational());
+            else if (eatString("!="))
+                x = new BinaryOpNode(x, "!=", parseRelational());
+            else
+                return x;
+        }
+    }
+
+    private Node parseRelational() {
+        Node x = parseAdditive();
+        for (;;) {
+            if (eatString(">="))
+                x = new BinaryOpNode(x, ">=", parseAdditive());
+            else if (eatString("<="))
+                x = new BinaryOpNode(x, "<=", parseAdditive());
+            else if (eat('>'))
+                x = new BinaryOpNode(x, ">", parseAdditive());
+            else if (eat('<'))
+                x = new BinaryOpNode(x, "<", parseAdditive());
+            else
+                return x;
+        }
+    }
+
+    private Node parseAdditive() {
+        Node x = parseMultiplicative();
+        for (;;) {
+            if (eat('+'))
+                x = new BinaryOpNode(x, "+", parseMultiplicative()); // addition
+            else if (eat('-'))
+                x = new BinaryOpNode(x, "-", parseMultiplicative()); // subtraction
+            else
+                return x;
+        }
+    }
+
+    private Node parseMultiplicative() {
         Node x = parseFactor();
         for (;;) {
             if (eat('*'))
-                x = new BinaryOpNode(x, '*', parseFactor()); // multiplication
+                x = new BinaryOpNode(x, "*", parseFactor()); // multiplication
             else if (eat('/'))
-                x = new BinaryOpNode(x, '/', parseFactor()); // division
+                x = new BinaryOpNode(x, "/", parseFactor()); // division
             else
                 return x;
         }
@@ -197,7 +253,7 @@ public class FormulaParser {
         if (eat('+'))
             return parseFactor(); // unary plus
         if (eat('-'))
-            return new BinaryOpNode(new ConstantNode(0), '-', parseFactor()); // unary minus
+            return new BinaryOpNode(new ConstantNode(0), "-", parseFactor()); // unary minus
 
         Node x;
         int startPos = pos;
@@ -216,7 +272,8 @@ public class FormulaParser {
             eat('%'); // eat closing %
             x = new VariableNode(varName);
         } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) { // functions
-            while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9'))
+            while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_') // Allow
+                                                                                                                  // underscore
                 nextChar();
             String funcName = expression.substring(startPos, pos);
             if (eat('(')) {
@@ -227,11 +284,45 @@ public class FormulaParser {
                 eat(')');
                 x = new FunctionNode(funcName, args);
             } else {
-                x = new VariableNode(funcName); // No parens -> treat as var? Or error. For now variable.
+                x = new VariableNode(funcName); // No parens -> treat as var
             }
         } else {
             throw new RuntimeException("Unexpected: " + (char) ch);
         }
         return x;
+    }
+
+    private boolean eatString(String s) {
+        int savedPos = pos;
+        int savedCh = ch;
+        // Skip whitespace before check
+        while (ch == ' ')
+            nextChar();
+
+        for (int i = 0; i < s.length(); i++) {
+            if (ch != s.charAt(i)) {
+                // backtrack
+                pos = savedPos;
+                ch = savedCh;
+                // Re-consume char at pos if needed?
+                // Wait, nextChar() advances. if we reset pos, we need to call nextChar() to set
+                // ch correctly?
+                // Actually my nextChar implementation sets ch based on pos.
+                // So if I reset pos to savedPos, I need to call `ch = expression.charAt(pos)`
+                // basic logic.
+                // but `nextChar` does `++pos`.
+                // Let's rely on simple peek logic or strict backtracking.
+                // My parser keeps `ch` as "current char at pos".
+                // When we start `eatString`, `ch` is the current char. `pos` is index of `ch`.
+
+                // Let's implement robust backtrack manually
+                pos = savedPos;
+                // restore ch
+                ch = savedCh;
+                return false;
+            }
+            nextChar();
+        }
+        return true;
     }
 }

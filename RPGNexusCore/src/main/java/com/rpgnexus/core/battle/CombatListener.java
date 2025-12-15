@@ -9,6 +9,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 엔티티 간의 전투 이벤트를 처리합니다.
  */
@@ -24,29 +27,36 @@ public class CombatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onAttack(EntityDamageByEntityEvent event) {
+        // Only handle Player vs Entity or Player vs Player for now
         if (!(event.getDamager() instanceof Player attacker)) {
             return;
         }
 
-        // 공격자가 플레이어인 경우
         NexusProfile attackerProfile = dataManager.getProfile(attacker.getUniqueId());
         if (attackerProfile == null)
             return;
 
-        int str = (int) attackerProfile.getStat("STR");
-        int def = 0;
-
-        // 방어자가 플레이어인 경우 방어력 가져오기
+        NexusProfile defenderProfile = null;
         if (event.getEntity() instanceof Player defender) {
-            NexusProfile defenderProfile = dataManager.getProfile(defender.getUniqueId());
-            if (defenderProfile != null) {
-                def = (int) defenderProfile.getStat("DEF");
-            }
+            defenderProfile = dataManager.getProfile(defender.getUniqueId());
         }
+
+        // Build Context Tags dynamically
+        // In the future this can come from Metadata, Item Tags, or Skill API
+        Map<String, String> tags = new HashMap<>();
+
+        // Default mappings matching the example config
+        tags.put("Damage-Kind", "melee"); // Default to melee
+        tags.put("Damage-Sort", "physical"); // Default to physical
+        tags.put("Damage-Stem", "normal"); // Default to normal attack
+
+        // Example: Check if attacker is holding a specific item to change 'Damage-Kind'
+        // to 'ranged'
+        // This logic can be expanded later.
 
         // 데미지 재계산
         BattleManager battleManager = plugin.getCoreManager().getBattleManager();
-        double finalDamage = battleManager.calculateDamage(event.getDamage(), str, def);
+        double finalDamage = battleManager.calculateDamage(attackerProfile, defenderProfile, event.getDamage(), tags);
 
         event.setDamage(finalDamage);
     }
